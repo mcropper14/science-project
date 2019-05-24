@@ -82,6 +82,12 @@ void setup() {
     set_ramp(12,90,100,110);    // ramp centred in LED 100 with 10 led fordward and 10 backguard 
     for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,(127-gravity_map[i])/8) );};
     track.show();
+    
+  if ((digitalRead(PIN_P2)==1)) //push switch two for loop 
+  {
+    set_loop(10, 80, 90, 100); // loop centred in LED 
+    for(in i=1;<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0(127-gravity_map[i])/8) );};
+    track.show();
   };
   start_race();    
 }
