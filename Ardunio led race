@@ -92,7 +92,9 @@ void setup() {
   start_race();    
 }
 
-void start_race(){for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,0));};
+void start_race(){
+for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,0));};
+if ((digitalRead(PIN_P1)
                   track.show();
                   delay(2000);
                   track.setPixelColor(12, track.Color(0,255,0));
