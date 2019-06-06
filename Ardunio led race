@@ -1,25 +1,24 @@
- 
-ew
-Myra-
-// add switch for led to turn on and off
-// add void_set loop
-// call the void_set loop function; is currently added but not called in the function 
-// update the number of neopixels 
+ #include <Adafruit_NeoPixel.h>
 
+// code for three buttons 
 
+// wont start until is pressed 
+                                                            
 #include <Adafruit_NeoPixel.h>
-#define MAXLED         300 // MAX LEDs actives on strip
+#define MAXLED        150 // MAX LEDs actives on strip
 
 #define PIN_LED        A0  // R 500 ohms to DI pin for WS2812 and WS2813, for WS2813 BI pin of first LED to GND  ,  CAP 1000 uF to VCC 5v/GND,power supplie 5V 2A  
 #define PIN_P1         7   // switch player 1 to PIN and GND
 #define PIN_P2         6   // switch player 2 to PIN and GND 
+#define PIN_P3         8   // switch player 3 to PIN and GND
 #define PIN_AUDIO      3   // through CAP 2uf to speaker 8 ohms
 
 
 int NPIXELS=MAXLED; // leds on track
 
-#define COLOR1    track.Color(255,0,0)
-#define COLOR2    track.Color(0,255,0)
+#define COLOR1    track.Color (255,0,0)                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ,0)
+#define COLOR2    track.Color(255,255,0)
+#define COLOR3    track.Color(0,0,255)
 
 int win_music[] = {
   2637, 2637, 0, 2637, 
@@ -33,18 +32,21 @@ int TBEEP=3;
 
 float speed1=0;
 float speed2=0;
+float speed3=0;
 float dist1=0;
 float dist2=0;
+float dist3=0;
 
 byte loop1=0;
 byte loop2=0;
+byte loop3=0;
 
 byte leader=0;
-byte loop_max=5; //total laps race
+byte loop_max=1; //total laps race
 
 
-float ACEL=0.2;
-float kf=0.015; //friction constant
+float ACEL=0.2; //0.2
+float kf=0.015;  //0.03 //friction constant
 float kg=0.003; //gravity constant
 
 byte flag_sw1=0;
@@ -60,40 +62,46 @@ int tdelay = 5;
 void set_ramp(byte H,byte a,byte b,byte c)
 {for(int i=0;i<(b-a);i++){gravity_map[a+i]=127-i*((float)H/(b-a));};
  gravity_map[b]=127; 
- for(int i=0;i<(c-b);i++){gravity_map[b+i+1]=127+H-i*((float)H/(c-b));};
+ for(int i=0;i<(c-b);i++){gravity_map[b+i+1]=127+H-i*((float)H/(c-b));}
+ for(int i=0;i<(a-c);i++){gravity_map[c+i+1]=127-H+i*((float)H/(a-c));}
+ 
+ 
+ 
 }
 
 void set_loop(byte H,byte a,byte b,byte c)
 {for(int i=0;i<(b-a);i++){gravity_map[a+i]=127-i*((float)H/(b-a));};
  gravity_map[b]=255; 
  for(int i=0;i<(c-b);i++){gravity_map[b+i+1]=127+H-i*((float)H/(c-b));};
+ // i think i need to add another for 
 }
 
 
 void setup() {
   for(int i=0;i<NPIXELS;i++){gravity_map[i]=127;};
   track.begin(); 
+
   pinMode(PIN_P1,INPUT_PULLUP); 
-  pinMode(PIN_P2,INPUT_PULLUP);  
+  pinMode(PIN_P2,INPUT_PULLUP);
+  pinMode(PIN_P3,INPUT_PULLUP);  
 
   if ((digitalRead(PIN_P1)==0)) //push switch 1 on reset for activate physic
   {
-    set_ramp(12,90,100,110);    // ramp centred in LED 100 with 10 led fordward and 10 backguard 
+    set_ramp(12,26,32,38); 
+    set_loop(12,49,58,68);
+   
+    
     for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,(127-gravity_map[i])/8) );};
+    
+    // ramp centred in LED 100 with 10 led fordward and 10 backguard 
+    
     track.show();
     
-  if ((digitalRead(PIN_P2)==1)) //push switch two for loop 
-  {
-    set_loop(10, 80, 90, 100); // loop centred in LED 
-    for(in i=1;<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0(127-gravity_map[i])/8) );};
-    track.show();
-  };
-  start_race();    
+    
+  }; start_race();    
 }
 
-void start_race(){
-for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,0));};
-if ((digitalRead(PIN_P1)
+void start_race(){for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,0));};
                   track.show();
                   delay(2000);
                   track.setPixelColor(12, track.Color(0,255,0));
@@ -120,6 +128,9 @@ if ((digitalRead(PIN_P1)
                   noTone(PIN_AUDIO);                               
                   timestamp=0;              
                  };
+ 
+
+
 
 void winner_fx() {
                int msize = sizeof(win_music) / sizeof(int);
@@ -133,11 +144,13 @@ void winner_fx() {
                                                
               };
 
-void draw_car1(void){for(int i=0;i<=loop1;i++){track.setPixelColor(((word)dist1 % NPIXELS)+i, track.Color(0,255-i*20,0));};                   
+void draw_car1(void){for(int i=0;i<=loop1;i++){track.setPixelColor(((word)dist1 % NPIXELS)+i, track.Color(0,255-i*20,0));}; // green                   
   }
 
-void draw_car2(void){for(int i=0;i<=loop2;i++){track.setPixelColor(((word)dist2 % NPIXELS)+i, track.Color(255-i*20,0,0));};            
+void draw_car2(void){for(int i=0;i<=loop2;i++){track.setPixelColor(((word)dist2 % NPIXELS)+i, track.Color(255,255,0));}; // yellow           
  }
+void draw_car3(void){for(int i=0;i<=loop3;i++){track.setPixelColor(((word)dist3 % NPIXELS)+i, track.Color(0,0,255-i*20));}; // blue 
+ } 
   
 void loop() {
     //for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,0));};
@@ -145,35 +158,43 @@ void loop() {
     
     if ( (flag_sw1==1) && (digitalRead(PIN_P1)==0) ) {flag_sw1=0;speed1+=ACEL;};
     if ( (flag_sw1==0) && (digitalRead(PIN_P1)==1) ) {flag_sw1=1;};
+    //if ( (flag_sw1==
+    // possible add another?
 
-    if ((gravity_map[(word)dist1 % NPIXELS])<127) speed1-=kg*(127-(gravity_map[(word)dist1 % NPIXELS]));
-    if ((gravity_map[(word)dist1 % NPIXELS])>127) speed1+=kg*((gravity_map[(word)dist1 % NPIXELS])-127);
+   // if ((gravity_map[(word)dist1 % NPIXELS])<127) speed1-=kg*(127-(gravity_map[(word)dist1 % NPIXELS]));
+    //if ((gravity_map[(word)dist1 % NPIXELS])>127) speed1+=kg*((gravity_map[(word)dist1 % NPIXELS])-127);
+    //possibly add another
     
     
     speed1-=speed1*kf; 
     
     if ( (flag_sw2==1) && (digitalRead(PIN_P2)==0) ) {flag_sw2=0;speed2+=ACEL;};
     if ( (flag_sw2==0) && (digitalRead(PIN_P2)==1) ) {flag_sw2=1;};
+    // add blue 
 
     if ((gravity_map[(word)dist2 % NPIXELS])<127) speed2-=kg*(127-(gravity_map[(word)dist2 % NPIXELS]));
     if ((gravity_map[(word)dist2 % NPIXELS])>127) speed2+=kg*((gravity_map[(word)dist2 % NPIXELS])-127);
+    // add blue 
         
     speed2-=speed2*kf; 
         
     dist1+=speed1;
     dist2+=speed2;
+    dist3+=speed3;
 
     if (dist1>dist2) {leader=1;} 
     if (dist2>dist1) {leader=2;};
+    // add for blue 
       
     if (dist1>NPIXELS*loop1) {loop1++;tone(PIN_AUDIO,600);TBEEP=2;};
     if (dist2>NPIXELS*loop2) {loop2++;tone(PIN_AUDIO,700);TBEEP=2;};
+    // add for blue
 
-    if (loop1>loop_max) {for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,255,0));}; track.show();
+    if (loop1>loop_max) {for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,255,0));}; track.show(); // green
                                                     winner_fx();loop1=0;loop2=0;dist1=0;dist2=0;speed1=0;speed2=0;timestamp=0;
                                                     start_race();
                                                    }
-    if (loop2>loop_max) {for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(255,0,0));}; track.show();
+    if (loop2>loop_max) {for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(80,205,50));}; track.show(); // yellow
                                                     winner_fx();loop1=0;loop2=0;dist1=0;dist2=0;speed1=0;speed2=0;timestamp=0;
                                                     start_race();
                                                    }
@@ -181,8 +202,8 @@ void loop() {
                           else {draworder=0;}   
                          }; 
 
-    if (draworder==0) {draw_car1();draw_car2();}
-        else {draw_car2();draw_car1();}   
+    if (draworder==0) {draw_car1();draw_car2();draw_car3();}
+        else {draw_car2();draw_car1();draw_car3();}   
                  
     track.show(); 
     delay(tdelay);
