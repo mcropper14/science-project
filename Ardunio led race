@@ -51,6 +51,7 @@ float kg=0.003; //gravity constant
 
 byte flag_sw1=0;
 byte flag_sw2=0;
+byte flag_sw3=0;
 byte draworder=0;
  
 unsigned long timestamp=0;
@@ -179,7 +180,18 @@ void loop() {
     
         
     speed2-=speed2*kf; 
+    
+    if ( (flag_sw3==1) && (digitalRead(PIN_P3)==0) ) {flag_sw3=0;speed3+=ACEL;};
+    if ( (flag_sw3==0) && (digitalRead(PIN_P3)==1) ) {flag_sw3=1;};
+    if ( (flag_sw3==2) && (digitalRead(PIN_P3)==2) ) {flag_sw3=1;};
+    
+
+    if ((gravity_map[(word)dist3 % NPIXELS])<127) speed3-=kg*(127-(gravity_map[(word)dist3 % NPIXELS]));
+    if ((gravity_map[(word)dist3 % NPIXELS])>127) speed3+=kg*((gravity_map[(word)dist3 % NPIXELS])-127);
+    
         
+    speed3-=speed3*kf; 
+    
     dist1+=speed1;
     dist2+=speed2;
     dist3+=speed3;
@@ -193,19 +205,24 @@ void loop() {
     // add for blue
 
     if (loop1>loop_max) {for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,255,0));}; track.show(); // green
-                                                    winner_fx();loop1=0;loop2=0;dist1=0;dist2=0;speed1=0;speed2=0;timestamp=0;
+                                                    winner_fx();loop1=0;loop2=0;loop3=0;dist1=0;dist2=0;dist3=0;speed1=0;speed2=0;speed3=0;timestamp=0;
                                                     start_race();
                                                    }
     if (loop2>loop_max) {for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(80,205,50));}; track.show(); // yellow
-                                                    winner_fx();loop1=0;loop2=0;dist1=0;dist2=0;speed1=0;speed2=0;timestamp=0;
+                                                    winner_fx();loop1=0;loop2=0;loop3=0;dist1=0;dist2=0;dist3=0;speed1=0;speed2=0;speed3=0;timestamp=0;
                                                     start_race();
                                                    }
+    if (loop3>loop_max) {for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,255));}; track.show(); // blue
+                                                    winner_fx();loop1=0;loop2=0;loop3=0;dist1=0;dist2=0;dist3=0;speed1=0;speed2=0;speed3=0;timestamp=0;
+                                                    start_race();
+                                                   }                                               
+                                                   
     if ((millis() & 512)==(512*draworder)) {if (draworder==0) {draworder=1;}
                           else {draworder=0;}   
                          }; 
 
     if (draworder==0) {draw_car1();draw_car2();draw_car3();}
-        else {draw_car2();draw_car1();draw_car3();}   
+        else {draw_car3();draw_car2();draw_car1()}   
                  
     track.show(); 
     delay(tdelay);
